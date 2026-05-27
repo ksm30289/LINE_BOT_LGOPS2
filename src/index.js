@@ -27,8 +27,8 @@ const pendingCrossChecks = {};
 
 // 여기에 //방정보 로 확인한 groupId를 넣으면 돼.
 const GROUP_PROJECT_MAP = {
-   'Cc4230c46499f5ae95a973224319b3a51': 'undecember',
-   'C0cd3ba8f6f4ef6b34360e53ffe2da7be': 'fairy_tale_quest',
+  'Cc4230c46499f5ae95a973224319b3a51': 'undecember',
+  'C0cd3ba8f6f4ef6b34360e53ffe2da7be': 'fairy_tale_quest',
 };
 
 function getSourceId(source) {
@@ -74,9 +74,10 @@ function getPrompt(projectKey) {
 [인게임 공지 검수 규칙]
 - 적용 리전을 확인한다.
 - 공지 타입을 확인한다.
-- 긴급 공지 여부를 확인한다.
-- 공지 시작/종료 시간을 확인한다.
+- 긴급 공지 체크 여부를 확인한다.
+- 공지사항 출력타입 체크 여부를 확인한다
 - 권장 업데이트 안내 여부를 확인한다.
+- 공지 시작/종료 시간을 확인한다.
 
 [출력 형식]
 [언디셈버 - 화면 종류]
@@ -167,8 +168,15 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
       const sourceId = getSourceId(event.source);
       const projectKey = GROUP_PROJECT_MAP[sourceId];
 
+      // =========================
+      // 이미지 메시지 처리
+      // =========================
       if (event.type === 'message' && event.message.type === 'image') {
-        if (!pendingCrossChecks[sourceId]) {
+
+        const crossCheck = pendingCrossChecks[sourceId];
+
+        // 크로스체크 미실행
+        if (!crossCheck) {
           await client.replyMessage({
             replyToken: event.replyToken,
             messages: [
@@ -178,6 +186,29 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
               },
             ],
           });
+
+          return;
+        }
+
+        // 5분 초과 체크
+        const now = Date.now();
+        const elapsed = now - crossCheck.startedAt;
+
+        if (elapsed > 5 * 60 * 1000) {
+          delete pendingCrossChecks[sourceId];
+
+          await client.replyMessage({
+            replyToken: event.replyToken,
+            messages: [
+              {
+                type: 'text',
+                text:
+                  '크로스체크 시간이 만료되었습니다.\n' +
+                  '다시 //크로스체크 를 입력해주세요.',
+              },
+            ],
+          });
+
           return;
         }
 
@@ -218,7 +249,8 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
 
         console.log(result);
 
-        delete pendingCrossChecks[sourceId];
+        // 삭제 안함 = 5분간 계속 사용 가능
+        // delete pendingCrossChecks[sourceId];
 
         await client.replyMessage({
           replyToken: event.replyToken,
@@ -233,6 +265,9 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
         return;
       }
 
+      // =========================
+      // 텍스트 메시지 처리
+      // =========================
       if (event.type === 'message' && event.message.type === 'text') {
         const userMessage = event.message.text.trim();
 
@@ -257,6 +292,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
         }
 
         if (userMessage === '//크로스체크') {
+
           pendingCrossChecks[sourceId] = {
             startedAt: Date.now(),
           };
@@ -269,7 +305,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
                 text:
                   `크로스체크를 시작합니다.\n` +
                   `프로젝트: ${getProjectName(projectKey)}\n` +
-                  `5분 내로 이미지를 업로드해주세요.`,
+                  `5분 동안 연속 이미지 검수가 가능합니다.`,
               },
             ],
           });
@@ -280,6 +316,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
     }
 
     res.status(200).end();
+
   } catch (error) {
     console.error(error);
     res.status(500).end();
