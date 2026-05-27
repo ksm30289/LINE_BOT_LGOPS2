@@ -88,7 +88,7 @@ function getPrompt(projectKey) {
 리전:
 - ...
 
-대상:
+NID 리스트/리스트(입력 개수):
 - ...
 
 설정 보상:
@@ -96,9 +96,6 @@ function getPrompt(projectKey) {
 
 우편/공지 정보:
 - ...
-
-검수 결과:
-- 확인된 내용만 간단히 작성
 `;
   }
 
@@ -125,7 +122,6 @@ function getPrompt(projectKey) {
 - Rewards 영역을 기준으로 보상을 판단한다.
 - Purpose, Date, 보상 만료 시간, Market, Type, PostNo를 확인한다.
 - 보상명과 수량을 추출한다.
-- 언어별 템플릿 제목/내용이 보이면 입력 여부만 확인한다.
 
 [인게임 공지 검수 규칙]
 - Purpose를 확인한다.
@@ -134,7 +130,6 @@ function getPrompt(projectKey) {
 - Notice Date 시작/종료 시간을 확인한다.
 - App Market을 확인한다.
 - App Version을 확인한다.
-- KO, EN, JP, ID, ZH-HANT, TH, PT, ES 언어별 입력 여부를 확인한다.
 
 [출력 형식]
 [페어리테일 퀘스트 - 화면 종류]
@@ -151,12 +146,6 @@ function getPrompt(projectKey) {
 
 공지/메일 정보:
 - ...
-
-언어 입력 상태:
-- ...
-
-검수 결과:
-- 확인된 내용만 간단히 작성
 `;
   }
 
@@ -287,16 +276,6 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
 
           return;
         }
-
-        await client.replyMessage({
-          replyToken: event.replyToken,
-          messages: [
-            {
-              type: 'text',
-              text: `메시지 확인: ${userMessage}`,
-            },
-          ],
-        });
       }
     }
 
