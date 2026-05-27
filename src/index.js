@@ -27,8 +27,8 @@ const pendingCrossChecks = {};
 
 // 여기에 //방정보 로 확인한 groupId를 넣으면 돼.
 const GROUP_PROJECT_MAP = {
-  // 'Cc4230c46499f5ae95a973224319b3a51': 'undecember',
-  // 'C0cd3ba8f6f4ef6b34360e53ffe2da7be': 'fairy_tale_quest',
+   'Cc4230c46499f5ae95a973224319b3a51': 'undecember',
+   'C0cd3ba8f6f4ef6b34360e53ffe2da7be': 'fairy_tale_quest',
 };
 
 function getSourceId(source) {
