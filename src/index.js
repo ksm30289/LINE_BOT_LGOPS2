@@ -214,17 +214,8 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
 
         // 크로스체크 미실행
         if (!crossCheck) {
-          await client.replyMessage({
-            replyToken: event.replyToken,
-            messages: [
-              {
-                type: 'text',
-                text: '먼저 //크로스체크 를 입력해주세요.',
-              },
-            ],
-          });
-
-          return;
+          console.log('크로스체크 상태가 아니므로 이미지 무시');
+          continue;
         }
 
         // 5분 초과 체크
@@ -233,20 +224,8 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
 
         if (elapsed > 5 * 60 * 1000) {
           delete pendingCrossChecks[sourceId];
-
-          await client.replyMessage({
-            replyToken: event.replyToken,
-            messages: [
-              {
-                type: 'text',
-                text:
-                  '크로스체크 시간이 만료되었습니다.\n' +
-                  '다시 //크로스체크 를 입력해주세요.',
-              },
-            ],
-          });
-
-          return;
+          console.log('크로스체크 시간이 만료되어 이미지 무시');
+          continue;
         }
 
         console.log('이미지 업로드 감지');
