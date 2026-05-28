@@ -79,17 +79,28 @@ function getPrompt(projectKey) {
 - 권장 업데이트 안내 여부를 확인한다.
 - 공지 시작/종료 시간을 확인한다.
 
-[메일 화면 출력 형식]
+
+[개별 메일/CSV 메일 화면 출력 형식]
 [언디셈버 - 화면 종류]
+
+NID 리스트/리스트(입력 개수):
+- ...
+
+설정 보상:
+- ...
+
+우편 정보:
+- ...
+
+
+[전체 메일 화면 출력 형식]
+[언디셈버 - 전체 메일]
 
 기간:
 - 시작: ...
 - 종료: ...
 
 리전:
-- ...
-
-NID 리스트/리스트(입력 개수):
 - ...
 
 설정 보상:
@@ -140,8 +151,8 @@ NID 리스트/리스트(입력 개수):
 
 [전체 메일 검수 규칙]
 - Rewards 영역을 기준으로 보상을 판단한다.
-- Purpose, Date, 보상 만료 시간, Market, Type, PostNo를 확인한다.
-- 보상명과 수량을 추출한다.
+- Purpose, Date, 보상 만료 시간, Type, PostNo를 확인한다.
+- 보상명(Reward Type)과 수량(Count)을 추출한다.
 
 [인게임 공지 검수 규칙]
 - Purpose를 확인한다.
@@ -157,9 +168,6 @@ NID 리스트/리스트(입력 개수):
 기간:
 - 시작: ...
 - 종료: ...
-
-마켓:
-- ...
 
 설정 보상:
 - ...
@@ -222,7 +230,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
         const now = Date.now();
         const elapsed = now - crossCheck.startedAt;
 
-        if (elapsed > 5 * 60 * 1000) {
+        if (elapsed > 10 * 60 * 1000) {
           delete pendingCrossChecks[sourceId];
           console.log('크로스체크 시간이 만료되어 이미지 무시');
           continue;
@@ -321,7 +329,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
                 text:
                   `크로스체크를 시작합니다.\n` +
                   `프로젝트: ${getProjectName(projectKey)}\n` +
-                  `5분 동안 연속 이미지 검수가 가능합니다.`,
+                  `10분 동안 연속 이미지 검수가 가능합니다.`,
               },
             ],
           });
